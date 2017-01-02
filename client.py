@@ -1,6 +1,6 @@
 import socket
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import cv2
@@ -19,20 +19,20 @@ win2 = QWidget()  # win2 - message sender
 img = QLineEdit(win2)
 msg = QLineEdit(win2)
 button = QPushButton(win2)
-msgPreview = QPushButton(win2)
-win3 = QWidget() #review of message: list form header[textbox + list], image [qpixelmap], message [textbox]
-add = QLabel(win3)
-send = QPushButton(win3)
-imma = QPixmap(win3)
+# msgPreview = QPushButton(win2)
+#win3 = QWidget() #review of message: list form header[textbox + list], image [qpixelmap], message [textbox]
+#add = QLabel(win3)
+#send = QPushButton(win3)
+#imma = QPixmap(win3)
 
 #Widget with textbox for autor, textbox for other recievers, QPIXELMAP with image and some textbox for message
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('localhost', 1000)
 #handling preview and another sending option
-def review():
-    if img.text() != '': t_image = cv2.imread('client/' + img.text() + '.jpg');  t_x = image.shape[0]; t_y = image.shape[1]
-    win3.show()
+# def review():
+#     if img.text() != '': t_image = cv2.imread('client/' + img.text() + '.jpg');  t_x = image.shape[0]; t_y = image.shape[1]
+#     win3.show()
 
 #foo to handle recieved msg
 def rcv():
@@ -47,11 +47,14 @@ def imgToString(img):
 def msg_creator(): win2.show()
 
 def sendMsg():
-    if img.text() != '': image = cv2.imread('client/'+img.text()+'.jpg');  x = str(image.shape[0]); y = str(image.shape[1])
-    else: x = ''; y = ''
+    print('test')
+    if img.text() != '': print(img.text()); image = cv2.imread('client/'+img.text()+'.jpg');  x = str(image.shape[0]); y = str(image.shape[1])
+    else:   print('wchodze'); x = ''; y = ''
     #show(recvs,image,msg)
+    print('test2')
     buffer = (imgToString(image)+'|||'+msg.text()+'|||'+x+'|||'+y).encode()
     sock.connect(server_address)
+    print('sending')
     try:
         #sock.sendall(header)
         sock.sendall(buffer)
@@ -68,9 +71,9 @@ def initialize_msg_creator():
     msg.show()
     button.show()
     img.show()
-    msgPreview.move(50,125)
-    msgPreview.show()
-    msgPreview.clicked.connect(review)
+    # msgPreview.move(50,125)
+    # msgPreview.show()
+    # msgPreview.clicked.connect(review)
     button.clicked.connect(sendMsg)
 
 #main
