@@ -18,7 +18,7 @@ VISION OF FINAL VERSION:
 
 ############################################################################
 
-version 0.0.1
+version 0.0.2
 
 STRUCTURE OF PROJECT:
 -main_dir:
@@ -54,7 +54,9 @@ DESCRIPTION OF MESSAGE PATTERN:
 
 ####################################################################################3
 
-#TODO for 0.0.2 version:
-*server.cpp (cpp)
-*own signal/slot system for receiving messages on client site (py)
+Differences between 0.0.1 and 0.0.2:
+*Added pop-up window in file.py, to show message and image after receiving them
+
+#TODO for 0.0.3 version:
+*server.cpp (cpp) - Jenny?
 *better interface for sending/receiving messages (py)
