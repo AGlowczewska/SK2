@@ -3,7 +3,7 @@ README.TXT
 VISION OF FINAL VERSION:
 *fully based on PyQT client interface made for sending images and messages to other clients connected to server
 *server written in c/cpp
-*every client will connect to server by one, choosen port; client can write his own nickname
+*every client will connect to server by one, chosen port; client can write his own nickname
 *server will send back new port, where stable connection will be established (every client will have his unique port)
 *server will send forward message of new user in system
 *client interface will automaticaly update 'users_list'
