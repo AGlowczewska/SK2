@@ -25,7 +25,7 @@ def loadMessage(buffer):
 
 #init connection
 ip = 'localhost' # string
-port = 1000 # integer
+port = 1025 # integer ## can't be lower that 1024 for unprivilaged users (AG)
 BUF_SIZE = 256
 sock = s.socket(s.AF_INET, s.SOCK_STREAM)
 server_address=(ip, port)
