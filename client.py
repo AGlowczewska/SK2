@@ -25,7 +25,6 @@ button = QPushButton(win2)
 #send = QPushButton(win3)
 #imma = QPixmap(win3)
 
-#Widget with textbox for autor, textbox for other recievers, QPIXELMAP with image and some textbox for message
 #####################################################################################
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_address = ('localhost', 2056)  ## can't be lower that 1024 for unprivilaged users (AG)
@@ -35,6 +34,7 @@ print("Connecting to server...")
 while 1:
     try:
         sock.connect(server_address)
+        ##### wysyłanie nAZWY - TO DO
         break
     except Exception:
         continue
