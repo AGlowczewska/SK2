@@ -30,7 +30,7 @@ loginButton.move(helloWin.width()/2-loginButton.width()/2,login.height())
 
 #connection vars
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('localhost', 1000)
+server_address = ('localhost', 2056)
 
 def closeWarn():
     infoWin.hide()

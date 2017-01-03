@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -15,16 +14,76 @@
 #define QUEUE_SIZE 5
 
 using namespace std;
+pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
+int Clients = 0; // number of connected clients
 
-int THREADS[5];
-int ThreadNumber = 0;
+ struct Thread{
+    int Id;
+    string Name;
+};
 
-/* struct thread_data_t{
-    int myNumber;
-    int descriptor;
-}; */
+Thread THREADS[QUEUE_SIZE]; // list of threads
+
+/*Function for reading from the socket */
+void *reading(void *client){
+
+}
+
+/*Function for sending list of currently connected clients to server */
+void update(){
+
+}
+
+/* Function for connecting clients to server */
+void connect(int mySocket){
+    int myConnection;
+    char myBuffer[BUF_SIZE];
+    
+    myConnection = accept(mySocket,NULL, NULL);
+    struct Thread data;
+    data.Id = myConnection;
+    if (myConnection < 0) {
+        cerr << "ERROR: Can't create connection socket." << endl;
+        exit(1);
+    } else {
+        cout << "Connection socket created:" << myConnection << endl;
+        bzero(myBuffer, BUF_SIZE);
+        read(myConnection, myBuffer, BUF_SIZE);
+        data.Name = myBuffer;
+        cout << "Client login:" << data.Name << endl;
+    }
+
+    pthread_t client;
+    if (pthread_create(&client, NULL, reading, (void *)&data) == 1){
+        cerr << "ERROR: Creating thread" << endl;
+        exit(1);
+    } else {
+        pthread_mutex_lock(&myMutex);
+        for (int i=0; i < QUEUE_SIZE; i++)
+            if (THREADS[i].Id == 0) {
+                THREADS[i].Id = data.Id;
+                THREADS[i].Name = data.Name;
+                cout << "Przypisano do id:" << i << endl;
+                break;
+            }
+        pthread_mutex_unlock(&myMutex);
+        Clients++;
+        cout << "Number of current connections:" << Clients << endl;
+    }
+
+    //update()
+}
 
 int main(int argc, char *argv[]){
+
+    /** Initializing the THREADS table **/
+    for (int i=0; i < QUEUE_SIZE; i++){
+        THREADS[i].Id = 0;
+        THREADS[i].Name = ' ';
+    };
+    /************************************/
+
+
     struct sockaddr_in myServer;
     memset(&myServer, 0, sizeof(struct sockaddr));
     myServer.sin_family = AF_INET;
@@ -39,7 +98,7 @@ int main(int argc, char *argv[]){
 
     char temp = 1;
     setsockopt(mySocket, SOL_SOCKET, SO_REUSEADDR, (char*)&temp, sizeof(temp));
-   cout << "Socket created" << endl;
+    cout << "Socket created" << endl;
 
     int myBind = bind(mySocket, (struct sockaddr*)&myServer, sizeof(struct sockaddr));
     if(myBind < 0 ){
@@ -53,22 +112,10 @@ int main(int argc, char *argv[]){
         cerr << "ERROR: Queque size"<< endl;
         exit(1);
     }
+    cout << "Waiting for clients to join..." <<endl;
 
-    int myConnection;
-
-    char myBuffer[BUF_SIZE];
-    bzero(myBuffer, BUF_SIZE);
-    cout << "Waiting for client..." <<endl;
     while(1){
-        myConnection = accept(mySocket,NULL, NULL);
-        if (myConnection < 0) {
-            cerr << "ERROR: Can't create connection socket." << endl;
-            exit(1);
-        }
-        write(myConnection, myBuffer, sizeof(myBuffer));
-        cout << "Deskryptor połączenia:" << myConnection << endl;
-        cout << "Connection socket created... " << endl;
-        break;
+        if (Clients < 5) connect(mySocket);
     }
 
     return 0;
