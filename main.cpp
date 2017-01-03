@@ -38,7 +38,7 @@ void update(){
 void connect(int mySocket){
     int myConnection;
     char myBuffer[BUF_SIZE];
-    
+
     myConnection = accept(mySocket,NULL, NULL);
     struct Thread data;
     data.Id = myConnection;
@@ -66,8 +66,8 @@ void connect(int mySocket){
                 cout << "Przypisano do id:" << i << endl;
                 break;
             }
-        pthread_mutex_unlock(&myMutex);
         Clients++;
+        pthread_mutex_unlock(&myMutex);
         cout << "Number of current connections:" << Clients << endl;
     }
 
