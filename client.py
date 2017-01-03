@@ -26,9 +26,21 @@ button = QPushButton(win2)
 #imma = QPixmap(win3)
 
 #Widget with textbox for autor, textbox for other recievers, QPIXELMAP with image and some textbox for message
-
+#####################################################################################
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('localhost', 1000)
+server_address = ('localhost', 2056)  ## can't be lower that 1024 for unprivilaged users (AG)
+#function for connectring to serwer
+# IT WORKS
+print("Connecting to server...")
+while 1:
+    try:
+        sock.connect(server_address)
+        break
+    except Exception:
+        continue
+print("Connection established")
+###################################################################################
+
 #handling preview and another sending option
 # def review():
 #     if img.text() != '': t_image = cv2.imread('client/' + img.text() + '.jpg');  t_x = image.shape[0]; t_y = image.shape[1]
@@ -53,7 +65,7 @@ def sendMsg():
     #show(recvs,image,msg)
     print('test2')
     buffer = (imgToString(image)+'|||'+msg.text()+'|||'+x+'|||'+y).encode()
-    sock.connect(server_address)
+    #sock.connect(server_address)
     print('sending')
     try:
         #sock.sendall(header)
