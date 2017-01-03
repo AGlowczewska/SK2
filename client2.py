@@ -3,17 +3,25 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-import cv2
-import numpy as np
+
+class WindowWithKeys(QWidget):
+    keyPressed = pyqtSignal(int)
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            if sock != None:
+                sock.close()
+            print("Escape key pressed. Goodbye!")
+            sys.exit(app.exec_())
+        self.keyPressed.emit(Qt.Key(event.key()))
 
 #init everyting
 app = QApplication(sys.argv)
-helloWin = QWidget() #login window
+helloWin = WindowWithKeys() #login window
 helloWin.setWindowTitle('First window')
 helloWin.resize(300,100)
-mainWin = QWidget() #main window for user
+mainWin = WindowWithKeys() #main window for user
 mainWin.setWindowTitle('Main board')
-infoWin = QWidget()
+infoWin = WindowWithKeys()
 infoWin.setWindowTitle('Warning!')
 infoWin.resize(200,100)
 warn = QLabel(infoWin)
@@ -69,4 +77,5 @@ exitWarn.clicked.connect(closeWarn)
 loginButton.show()
 helloWin.show()
 
+sock.close()
 sys.exit(app.exec_())
