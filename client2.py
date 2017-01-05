@@ -1,8 +1,10 @@
 import socket
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QListBox
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
+buf_size=1024
 
 class WindowWithKeys(QWidget):
     keyPressed = pyqtSignal(int)
@@ -13,6 +15,20 @@ class WindowWithKeys(QWidget):
             print("Escape key pressed. Goodbye!")
             sys.exit(app.exec_())
         self.keyPressed.emit(Qt.Key(event.key()))
+
+def receiveMessage(message):
+    message=message.decode()
+    temp_message = message.split(' ')
+    m_id = temp_message[0]
+    if m_id == 1:
+        nUsers=temp_message[1]
+        #arange list of users+ids
+        users = zip(*[iter(temp_message[2:])]*2)
+        for (username,_) in users:
+            usersList.addItem(username)
+        usersList.show()
+
+
 
 #init everyting
 app = QApplication(sys.argv)
@@ -29,6 +45,7 @@ warn.setText('You need nick name, to login')
 exitWarn = QPushButton(infoWin)
 exitWarn.move(0,warn.height())
 exitWarn.setText('Go back!')
+usersList = QListBox(mainWin)
 
 login=QLineEdit(helloWin) #line edit for user's nickname
 login.move(helloWin.width()/2-login.width()/2,0)
@@ -64,6 +81,10 @@ def logIn(): #function for connection
             finally:
                 print("Nickname sent")
             break
+            msg_received=''
+            while sock.rcv(buf_size) != None:
+                msg_received += sock.rcv(buf_size)
+            receiveMessage(msg_received)
         except Exception:
             continue
     print("Connection established")
