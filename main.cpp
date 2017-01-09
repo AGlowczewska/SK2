@@ -8,8 +8,9 @@
 #include <signal.h>
 #include <pthread.h>
 #include <iostream>
+#include <sstream>
 
-#define BUF_SIZE 256
+#define BUF_SIZE 1024
 #define SERVER_PORT 2056
 #define QUEUE_SIZE 5
 
@@ -24,7 +25,8 @@ int Clients = 0; // number of connected clients
 
 Thread THREADS[QUEUE_SIZE]; // list of threads
 
-/*Function for reading from the socket */
+/*Function for reading from the socke
+ * t */
 void *reading(void *client){
 
 }
@@ -32,14 +34,26 @@ void *reading(void *client){
 /*Function for sending list of currently connected clients to server */
 void update(){
 
+    char myBuffer[BUF_SIZE];
+    bzero(myBuffer, BUF_SIZE);
+    stringstream ss;
+    ss << 1 << Clients;
+    for (int i=0; i < Clients; i++){
+        ss << THREADS[i].Id << THREADS[i].Name;
+    }
+    string message = ss.str();
+    cout << message << endl;
+    for (int i=0; i< message.size(); i++) myBuffer[i] = message[i];
+    for (int i=0; i < Clients; i++) write(THREADS[i].Id, myBuffer, BUF_SIZE);
 }
 
 /* Function for connecting clients to server */
 void connect(int mySocket){
     int myConnection;
     char myBuffer[BUF_SIZE];
-
+    cout <<"before accept" <<endl;
     myConnection = accept(mySocket,NULL, NULL);
+    cout << "accepted" << endl;
     struct Thread data;
     data.Id = myConnection;
     if (myConnection < 0) {
@@ -67,11 +81,11 @@ void connect(int mySocket){
                 break;
             }
         Clients++;
+        update();
         pthread_mutex_unlock(&myMutex);
         cout << "Number of current connections:" << Clients << endl;
     }
 
-    //update()
 }
 
 int main(int argc, char *argv[]){
