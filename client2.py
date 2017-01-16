@@ -55,15 +55,19 @@ loginButton.move(helloWin.width()/2-loginButton.width()/2,login.height())
 
 #connection vars
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #server_address = ("localhost", 2056)
+#print(sock)
+
+server_address = ("localhost", 2056)
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def closeWarn():
     infoWin.hide()
     warn.hide()
     exitWarn.hide()
 
-def logIn(sock): #function for connection
+def logIn(): #function for connection
     #check for nickname
     if login.text() == '':
         infoWin.show()
@@ -72,15 +76,16 @@ def logIn(sock): #function for connection
         #show 'u need name'
         return
     #if nickname was entered, establish connection
+    server_address = ("localhost", 2057)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print(sock)
     print("Connecting to server...")
-    server_address = ("localhost", 2056)
     while 1:
         try:
             sock.connect(server_address)
             break
         except Exception:
             continue
-
     print("Connected")
     buf = "1 " + login.text()
     try:
@@ -91,7 +96,7 @@ def logIn(sock): #function for connection
     print("Connection established")
 
     msg_received = ''
-    while sock.rcv(buf_size) != None:
+    while sock.rcv(buf_size) != '':
         msg_received += sock.rcv(buf_size)
     receiveMessage(msg_received)
 
