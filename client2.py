@@ -21,8 +21,8 @@ def receiveMessage(message):
     # message=message.decode()
     temp_message = message.split(' ')
     m_id = temp_message[0]
-    if m_id == 1:
-        nUsers=temp_message[1]
+    if m_id[0] == 1:
+        nUsers=m_id[1]
         #arange list of users+ids
         users = zip(*[iter(temp_message[2:])]*2)
         for (desc,username) in users:
@@ -63,13 +63,8 @@ loginButton = QPushButton(helloWin) #after pushing that button, user will connec
 loginButton.setText('Login')
 loginButton.move(helloWin.width()/2-loginButton.width()/2,login.height())
 
-#connection vars
 
-#sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#server_address = ("localhost", 2056)
-#print(sock)
-
-server_address = ("localhost", 2056)
+server_address = ("localhost", 2057)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def closeWarn():
@@ -104,11 +99,7 @@ def logIn(): #function for connection
     finally:
         print("Nickname sent")
 
-
     print("Connection established"),
-
-
-
 
     mainWin.show()
     helloWin.hide()
