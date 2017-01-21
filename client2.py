@@ -33,9 +33,9 @@ def receiveMessage(message):
 def connectionThread(socket):
     msg_received = ''
     print("new thread")
-    while socket.recv(buf_size) == 0:
+    while len(socket.recv(buf_size).decode()) == 0:
         pass
-    while socket.recv(buf_size) != '':
+    while socket.recv(buf_size).decode() != '':
         msg_received += socket.recv(buf_size).decode()
     #receiveMessage(msg_received)
     print(msg_received)
