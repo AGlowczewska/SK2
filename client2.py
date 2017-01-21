@@ -33,6 +33,8 @@ def receiveMessage(message):
 def connectionThread(socket):
     msg_received = ''
     print("new thread")
+    while socket.recv(buf_size) == 0:
+        pass
     while socket.recv(buf_size) != '':
         msg_received += socket.recv(buf_size).decode()
     #receiveMessage(msg_received)
@@ -97,12 +99,12 @@ def logIn(): #function for connection
             continue
     print("Connected")
     buf = "1 " + login.text()
-
+    _thread.start_new_thread(connectionThread, (sock,))
     try:
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
-        _thread.start_new_thread(connectionThread, (sock,))
+
 
     print("Connection established"),
 
