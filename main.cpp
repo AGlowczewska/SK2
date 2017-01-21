@@ -39,7 +39,7 @@ void update(){
     stringstream ss;
     ss << 1 << Clients;
     for (int i=0; i < Clients; i++){
-        ss << THREADS[i].Id << THREADS[i].Name;
+        ss << THREADS[i].Id << THREADS[i].Name << " ";
     }
     string message = ss.str();
     cout << message << endl;
