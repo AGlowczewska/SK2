@@ -3,6 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QListWidget
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+import _thread
 
 buf_size=1024
 
@@ -28,6 +29,14 @@ def receiveMessage(message):
             usersList.addItem(username)
         usersList.show()
 
+
+def connectionThread(socket):
+    msg_received = ''
+    print("new thread")
+    while socket.recv(buf_size) != '':
+        msg_received += socket.recv(buf_size)
+    receiveMessage(msg_received)
+    print(msg_received.decode())
 
 
 #init everyting
@@ -88,17 +97,15 @@ def logIn(): #function for connection
             continue
     print("Connected")
     buf = "1 " + login.text()
+
     try:
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
+        _thread.start_new_thread(connectionThread, (sock,))
 
-    print("Connection established")
+    print("Connection established"),
 
-    msg_received = ''
-    while sock.rcv(buf_size) != '':
-        msg_received += sock.rcv(buf_size)
-    receiveMessage(msg_received)
 
 
 

@@ -11,7 +11,7 @@
 #include <sstream>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2056
+#define SERVER_PORT 2057
 #define QUEUE_SIZE 5
 
 using namespace std;
