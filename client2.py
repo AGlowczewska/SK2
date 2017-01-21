@@ -34,6 +34,7 @@ def receiveMessage(message):
 def connectionThread(socket):
     msg_received = ''
     print("new thread")
+    msg_received = socket.recv(buf_size).decode()
     print(msg_received)
     receiveMessage(msg_received)
     print("OLA")
