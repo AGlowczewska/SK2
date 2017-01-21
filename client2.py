@@ -18,23 +18,24 @@ class WindowWithKeys(QWidget):
         self.keyPressed.emit(Qt.Key(event.key()))
 
 def receiveMessage(message):
-    message=message.decode()
+    # message=message.decode()
     temp_message = message.split(' ')
     m_id = temp_message[0]
     if m_id == 1:
         nUsers=temp_message[1]
         #arange list of users+ids
         users = zip(*[iter(temp_message[2:])]*2)
-        for (username,_) in users:
-            usersList.addItem(username)
-        usersList.show()
+        for (desc,username) in users:
+            print("ID: {} Username: {}".format(desc,username))
+            # usersList.addItem(username)
+        #usersList.show()
 
 
 def connectionThread(socket):
+    msg_received = ''
     print("new thread")
-    msg_received = socket.recv(buf_size).decode()
-    #receiveMessage(msg_received)
     print(msg_received)
+    receiveMessage(msg_received)
     print("OLA")
 
 
