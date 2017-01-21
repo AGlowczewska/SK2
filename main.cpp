@@ -25,15 +25,26 @@ int Clients = 0; // number of connected clients
 
 Thread THREADS[QUEUE_SIZE]; // list of threads
 
-/*Function for reading from the socke
- * t */
+// function finds a i (in THREADS[i]) where the descriptor is
+int find(int descriptor){
+    for (int i=0; i < Clients; i++){
+        if (THREADS[i].Id == descriptor) return i;
+    }
+    cerr << "(Find func): NOT FOUND IN GLOBAL TABLE" << endl;
+    exit(1);
+}
+
+/*Function for reading from the socket */
 void *reading(void *client){
+    char myBuffer[BUF_SIZE];
+    struct Thread *myThread = (struct Thread*)client;
+    int myNumber = find((*myThread).Id);
+    cout << "(Read func): New thread for the client nr: " << myNumber << ", Name: " << THREADS[myNumber].Name << endl;
 
 }
 
 /*Function for sending list of currently connected clients to server */
 void update(){
-
     char myBuffer[BUF_SIZE];
     bzero(myBuffer, BUF_SIZE);
     stringstream ss;
@@ -42,7 +53,7 @@ void update(){
         ss << THREADS[i].Id << THREADS[i].Name << " ";
     }
     string message = ss.str();
-    cout << message << endl;
+    cout << "(Update function): Updating to all:" << message << endl;
     for (int i=0; i< message.size(); i++) myBuffer[i] = message[i];
     for (int i=0; i < Clients; i++) write(THREADS[i].Id, myBuffer, BUF_SIZE);
 }
@@ -51,20 +62,20 @@ void update(){
 void connect(int mySocket){
     int myConnection;
     char myBuffer[BUF_SIZE];
-    cout <<"before accept" <<endl;
+    //cout <<"before accept" <<endl;
     myConnection = accept(mySocket,NULL, NULL);
-    cout << "accepted" << endl;
+    //cout << "accepted" << endl;
     struct Thread data;
     data.Id = myConnection;
     if (myConnection < 0) {
         cerr << "ERROR: Can't create connection socket." << endl;
         exit(1);
     } else {
-        cout << "Connection socket created:" << myConnection << endl;
+        cout << "(Connect func): Connection socket created:" << myConnection << endl;
         bzero(myBuffer, BUF_SIZE);
         read(myConnection, myBuffer, BUF_SIZE);
         data.Name = myBuffer;
-        cout << "Client login:" << data.Name << endl;
+        cout << "(Connect func): Client login:" << data.Name << endl;
     }
 
     pthread_t client;
@@ -77,13 +88,14 @@ void connect(int mySocket){
             if (THREADS[i].Id == 0) {
                 THREADS[i].Id = data.Id;
                 THREADS[i].Name = data.Name;
-                cout << "Przypisano do id:" << i << endl;
+               // cout << "Przypisano do id:" << THREADS[i].Id << endl;
+                cout << "(Connect func): Nr klienta: " << i << endl;
                 break;
             }
         Clients++;
+        cout << "(Connect func): Number of current connections:" << Clients << endl;
         update();
         pthread_mutex_unlock(&myMutex);
-        cout << "Number of current connections:" << Clients << endl;
     }
 
 }
@@ -112,21 +124,21 @@ int main(int argc, char *argv[]){
 
     char temp = 1;
     setsockopt(mySocket, SOL_SOCKET, SO_REUSEADDR, (char*)&temp, sizeof(temp));
-    cout << "Socket created" << endl;
+    cout << "(Main func): Socket created" << endl;
 
     int myBind = bind(mySocket, (struct sockaddr*)&myServer, sizeof(struct sockaddr));
     if(myBind < 0 ){
         cerr << "ERROR: Binding IP and port to socket" << endl;
         exit(1);
     }
-   cout << "Socket binded..." << endl;
+   cout << "(Main func): Socket binded..." << endl;
 
     int myListen = listen(mySocket, QUEUE_SIZE);
     if (myListen < 0 ){
         cerr << "ERROR: Queque size"<< endl;
         exit(1);
     }
-    cout << "Waiting for clients to join..." <<endl;
+    cout << "(Main func): Waiting for clients to join..." <<endl;
 
     while(1){
         if (Clients < 5) connect(mySocket);
