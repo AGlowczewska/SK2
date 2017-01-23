@@ -4,8 +4,27 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabe
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import _thread
-uss=[]
 buf_size=1024
+
+def mainData():
+    def __init__(self,users=[],socket=None):
+        self.users=users
+        self.socket=socket
+    def setSocket(self,sock):
+        self.socket=sock
+    def setUsers(self,users):
+        self.users=users
+    def clear(self):
+        self.users=[]
+        self.socket=None
+    def getSocket(self):
+        return self.socket
+    def getUsers(self):
+        return self.users
+
+data = mainData()
+
+
 
 class WindowWithKeys(QWidget):
     keyPressed = pyqtSignal(int)
@@ -34,9 +53,9 @@ def receiveMessage(message):
             print("ID: {} Username: {}".format(desc,username))
             usersList.addItem(username)
             uss.append(desc)
-        usersList.show()
 
-class messageWithArgs():
+        data.setUsers(uss)
+        usersList.show()
 
 
 
@@ -92,6 +111,8 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 def sendMsg():
+    sock = data.getSocket()
+    uss = data.getUsers()
     message = msg.toPlainText()
     n = len(uss)
     msg_type = "1"
@@ -102,6 +123,7 @@ def sendMsg():
     print(mg)
     try:
         print(sock)
+        print(uss)
         sock.sendall(mg.encode())
     finally:
         print("msg sent")
@@ -123,6 +145,7 @@ def logIn(): #function for connection
     #if nickname was entered, establish connection
     server_address = ("localhost", 2057)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    data.setSocket(sock)
     print(sock)
     print("Connecting to server...")
     while 1:
