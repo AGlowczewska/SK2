@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 #define BUF_SIZE 1024
 #define SERVER_PORT 2057
@@ -83,6 +84,45 @@ void *reading(void *client){
             pthread_exit(NULL);
         }
         cout << "(Read func): Message received:" << myBuffer << endl;
+        stringstream ss;
+        for (int i=0; i < QUEUE_SIZE; i++) ss << myBuffer[i];
+        string message = ss.str();
+
+        //vector<string> v;
+        //split( message, v, ' ');
+        //show( v );
+
+        int lodbiorcow = 0;
+        for (int i =1; i < BUF_SIZE; i++){
+            lodbiorcow = lodbiorcow*10 + (int)myBuffer[i];
+            if (myBuffer[i] == ' ') break;
+        }
+        int temp = 0; int len = 0;
+        for (int i =1; i < BUF_SIZE; i++){
+            if (temp == (lodbiorcow+1)) {
+                len = len*10 + (int)myBuffer[i];
+                if (myBuffer[i] == ' ') break;
+            }
+            if (myBuffer == " ") temp++;
+        }
+        cout << "(Read func): Received message from: " << myNumber <<" and will be sent to " << lodbiorcow <<" clients" << endl;
+        cout << "(Read func): Message length is: " << len << endl;
+        if (myBuffer[0] == '1'){
+            //tekst
+        } else if (myBuffer[0] == '2'){
+            //zdjecie
+        }
+        // do update 11 4324 ola 12342 Piotr
+        // do wysylania tekstu 1[lodbiorcow] id1 [...] idn [dlwbajtachwiadomosci]
+        // [wiadomosc]
+        // do wyslania obrazu 2[lodbiorcow] id1 [...] idn [lwbajtachwiadomosci]
+        // [wiadomosc]    -> to wysyla klient a odbiera serwer
+        // serwer rozczytuje userow
+        // serwer wysyla
+        //pthread_mutex_lock(&myMutex2);
+        // wysylam wiad1
+        // wysylam wiad2
+        // unlock
     }
 
 }
@@ -91,7 +131,6 @@ void *reading(void *client){
 void connect(int mySocket){
     int myConnection;
     char myBuffer[BUF_SIZE];
-    //char myBuffer2[BUF_SIZE];
     //cout <<"before accept" <<endl;
     myConnection = accept(mySocket,NULL, NULL);
     //cout << "accepted" << endl;
@@ -104,7 +143,6 @@ void connect(int mySocket){
         cout << "(Connect func): Connection socket created:" << myConnection << endl;
         bzero(myBuffer, BUF_SIZE);
         read(myConnection, myBuffer, BUF_SIZE);
-        //bzero(myBuffer2, BUF_SIZE);
         for (int i =0; i <BUF_SIZE; i ++)
             if( myBuffer[i+2] !=0 ) {
                 myBuffer[i] = myBuffer[i+2];
