@@ -3,8 +3,11 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QListWidget, QTextEdit
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+import argparse as prsr
 import _thread
 buf_size=1024
+port=2058
+server='localhost'
 
 class mainData(object):
     _instance = None
@@ -40,6 +43,8 @@ class WindowWithKeys(QWidget):
             print("Escape key pressed. Goodbye!")
             sys.exit(app.exec_())
         self.keyPressed.emit(Qt.Key(event.key()))
+        if event.key() == Qt.Key.Enter:
+            logIn()
 
 def receiveMessage(message):
     temp_message = message.split(' ')
@@ -71,8 +76,7 @@ def connectionThread(socket):
     while True:
         msg_received = socket.recv(buf_size)
         # print(msg_received)
-
-        msg_received=msg_received.split('/x00')[0].decode()
+        msg_received=msg_received[:msg_received.find('/x00')].decode()
         receiveMessage(msg_received)
     print("OLA")
 
@@ -103,6 +107,7 @@ msgButton = QPushButton(mainWin)
 msg.move(0,usersList.width())
 msg.resize(200,100)
 msgButton.move(0,200)
+msgButton.setText('Messages creator')
 msg.show()
 msgButton.show()
 
@@ -113,7 +118,7 @@ loginButton.setText('Login')
 loginButton.move(helloWin.width()/2-loginButton.width()/2,login.height())
 
 
-server_address = ("localhost", 2057)
+server_address = (server,port)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 data.setSocket(sock)
 
@@ -126,12 +131,9 @@ def sendMsg():
     mg = msg_type + str(n) + " "
     for x in uss:
         mg += x + " "
-    mg+=message
-    print(mg)
+    sock.sendall(mg.encode)
     try:
-        print(sock)
-        print(uss)
-        sock.sendall(mg.encode())
+        sock.sendall(message.encode())
     finally:
         print("msg sent")
 
@@ -150,7 +152,7 @@ def logIn(): #function for connection
         #show 'u need name'
         return
     #if nickname was entered, establish connection
-    server_address = ("localhost", 2057)
+    server_address = (server,port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data.setSocket(sock)
     print(sock)
