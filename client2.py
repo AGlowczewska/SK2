@@ -8,9 +8,9 @@ buf_size=1024
 
 class mainData(object):
     _instance = None
-    def __new__(class_, socket=None,users=[]):
+    def __new__(class_):
         if not isinstance(class_._instance, class_):
-            class_._instance = object.__new__(class_, socket=None,users=[])
+            class_._instance = object.__new__(class_)
         return class_._instance
     def setSocket(self,sock):
         self.socket=sock
