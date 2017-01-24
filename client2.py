@@ -42,7 +42,6 @@ class WindowWithKeys(QWidget):
         self.keyPressed.emit(Qt.Key(event.key()))
 
 def receiveMessage(message):
-    # message=message.decode()
     temp_message = message.split(' ')
     m_id = temp_message[0]
     print(m_id[0])
@@ -70,8 +69,10 @@ def connectionThread(socket):
     msg_received = ''
     print("new thread")
     while True:
-        msg_received = socket.recv(buf_size).decode()
+        msg_received = socket.recv(buf_size)
         # print(msg_received)
+
+        msg_received=msg_received.split('/x00')[0].decode()
         receiveMessage(msg_received)
     print("OLA")
 
@@ -181,5 +182,5 @@ msgButton.clicked.connect(sendMsg)
 loginButton.show()
 helloWin.show()
 
-data.getSocket.close()
+data.getSocket().close()
 sys.exit(app.exec_())
