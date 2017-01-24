@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 import argparse as prsr
 import _thread
 buf_size=1024
-port=2058
+port=2059
 server='localhost'
 
 class mainData(object):
@@ -55,9 +55,7 @@ def receiveMessage(message):
         nUsers=int(m_id[1])
         data = mainData()
         print(nUsers)
-        #arange list of users+ids
         users = list(zip(*[iter(temp_message[1:])]*2))
-        # print(users)
         uss = []
         usersList.clear()
         for (desc,username) in users:
@@ -72,12 +70,10 @@ def receiveMessage(message):
 
 
 def connectionThread(socket):
-    msg_received = ''
     print("new thread")
     while True:
         msg_received = socket.recv(buf_size)
-        # print(msg_received)
-        msg_received=msg_received[:msg_received.find('/x00')].decode()
+        msg_received=msg_received[:msg_received.find(b'\x00')].decode()
         receiveMessage(msg_received)
     print("OLA")
 
@@ -123,6 +119,7 @@ server_address = (server,port)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 data.setSocket(sock)
 
+
 def sendMsg():
     sock = data.getSocket()
     uss = data.getUsers()
@@ -132,7 +129,8 @@ def sendMsg():
     mg = msg_type + str(n) + " "
     for x in uss:
         mg += x + " "
-    sock.sendall(mg.encode)
+    mg += str(sys.gesizeof(message.encode()))
+    sock.sendall(mg.encode())
     try:
         sock.sendall(message.encode())
     finally:
