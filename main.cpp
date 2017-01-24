@@ -12,11 +12,12 @@
 #include <vector>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2058
+#define SERVER_PORT 2056
 #define QUEUE_SIZE 5
 
 using namespace std;
 pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mySendReadMutex = PTHREAD_MUTEX_INITIALIZER;
 int Clients = 0; // number of connected clients
 
  struct Thread{
@@ -71,42 +72,44 @@ void killclient(int myNumber){
 /*Function for reading from the socket */
 void *reading(void *client){
     char myBuffer[BUF_SIZE];
-    int nBytes;
+    char myBuffer2[BUF_SIZE];
+    int nBytes; int nBytes2;
 
     struct Thread *myThread = (struct Thread*)client;
     int myNumber = find((*myThread).Id);
     cout << "(Read func): New thread for the client nr: " << myNumber << ", Name: " << THREADS[myNumber].Name << endl;
 
     while(1) {
+        pthread_mutex_lock(&mySendReadMutex);
         nBytes = read(THREADS[myNumber].Id, myBuffer, BUF_SIZE);
+        nBytes2 = read(THREADS[myNumber].Id, myBuffer2, BUF_SIZE);
+        pthread_mutex_unlock(&mySendReadMutex);
         if (nBytes == 0) {
             killclient(myNumber);
             pthread_exit(NULL);
         }
-        cout << "(Read func): Message received:" << myBuffer << endl;
+
         stringstream ss;
         for (int i=0; i < QUEUE_SIZE; i++) ss << myBuffer[i];
         string message = ss.str();
 
-        //vector<string> v;
-        //split( message, v, ' ');
-        //show( v );
+        cout << "(Read func): Message received:" << myBuffer2 << endl;
+        cout << "(Read func): Message header: " << message << endl;
+
 
         int lodbiorcow = message.find(' ') - 1;
-        int temp = message.find(' ', lodbiorcow + 2);
-        cout << "MY TEMP IS " << temp << endl;
+        int sendto[6]; for (int i=0; i<6; i++) sendto[i] = 0; //last position is length of file
 
-        ss.str(string());
-        for(int i = 0; i < BUF_SIZE; i++){
-            ss << myBuffer[i];
-            if (myBuffer[i] == ' '){
-                cout << ss.str() << endl;
-                ss.str(string());
+        int i = 3;
+        for( int j =0; j < lodbiorcow+1; j++){
+            while (myBuffer[i] != ' '){
+                sendto[j] = (sendto[j]*10) + (int)(myBuffer[i]) - 48;
+                i++;
             }
         }
 
         cout << "(Read func): Received message from: " << myNumber << " and will be sent to " << lodbiorcow <<" clients" << endl;
-        //cout << "(Read func): Message length is: " << len << endl;
+
         if (myBuffer[0] == '1'){
             //tekst
         } else if (myBuffer[0] == '2'){
