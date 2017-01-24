@@ -42,9 +42,10 @@ class WindowWithKeys(QWidget):
                 sock.close()
             print("Escape key pressed. Goodbye!")
             sys.exit(app.exec_())
-        self.keyPressed.emit(Qt.Key(event.key()))
-        if event.key() == Qt.Key.Enter:
+        if event.key() == Qt.Key_Enter:
             logIn()
+        self.keyPressed.emit(Qt.Key(event.key()))
+
 
 def receiveMessage(message):
     temp_message = message.split(' ')
