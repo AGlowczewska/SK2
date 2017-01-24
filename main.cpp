@@ -81,6 +81,7 @@ void *reading(void *client){
 
     while(1) {
         pthread_mutex_lock(&mySendReadMutex);
+        bzero(myBuffer, BUF_SIZE); bzero(myBuffer2, BUF_SIZE);
         nBytes = read(THREADS[myNumber].Id, myBuffer, BUF_SIZE);
         nBytes2 = read(THREADS[myNumber].Id, myBuffer2, BUF_SIZE);
         pthread_mutex_unlock(&mySendReadMutex);
@@ -167,7 +168,6 @@ void connect(int mySocket){
             if (THREADS[i].Id == 0) {
                 THREADS[i].Id = data.Id;
                 THREADS[i].Name = data.Name;
-               // cout << "Przypisano do id:" << THREADS[i].Id << endl;
                 cout << "(Connect func): Nr klienta: " << i << endl;
                 break;
             }
@@ -220,14 +220,15 @@ int main(int argc, char *argv[]){
     cout << "(Main func): Waiting for clients to join..." <<endl;
 
     while(1){
-        if (Clients < 5)
+        if (Clients < 1)
             connect(mySocket);
         else {
-            cout << "(Main func): disconnecting next client";
             char myBuffer[BUF_SIZE];
             bzero(myBuffer, BUF_SIZE);
             int temp = accept(mySocket,NULL, NULL);
+            cout << "(Main func): disconnecting next client";
             read(temp, myBuffer, BUF_SIZE);
+            cout << myBuffer << endl;
             bzero(myBuffer, BUF_SIZE);
             write(temp, myBuffer, BUF_SIZE);
         }
