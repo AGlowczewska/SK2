@@ -137,7 +137,7 @@ def sendMsg():
     finally:
         print("msg sent")
 
-def checkConnection():
+def checkConnection(sock):
     d=mainData()
     sock=d.getSocket()
     while 1:
@@ -179,7 +179,7 @@ def logIn(): #function for connection
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
-    _thread.start_new_thread(checkConnection)
+    _thread.start_new_thread(checkConnection, (sock,))
     print("Connection established")
 
     mainWin.show()
