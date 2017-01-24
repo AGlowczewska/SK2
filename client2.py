@@ -147,7 +147,8 @@ def checkConnection(sock):
     d=mainData()
     sock=d.getSocket()
     while 1:
-        if sys.getsizeof(sock.recv(10)) < 4:
+        temp = sock.recv(10).decode()
+        if temp == '':
             print("Disconnected from server")
             d.getSocket().close()
             sys.exit(app.exec_())
