@@ -12,7 +12,7 @@
 #include <vector>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2056
+#define SERVER_PORT 2059
 #define QUEUE_SIZE 5
 
 using namespace std;
@@ -38,7 +38,7 @@ void update(){
             ss << THREADS[i].Id << " " << THREADS[i].Name << " ";
     }
     string message = ss.str();
-    cout << "(Update function): Updating to all:" << message << endl;
+    cout << "(Update func): Updating to all:" << message << endl;
     for (int i=0; i< message.size(); i++) myBuffer[i] = message[i];
     for (int i=0; i < QUEUE_SIZE; i++)
         if (THREADS[i].Id != 0)
@@ -90,10 +90,10 @@ void *reading(void *client){
         }
 
         stringstream ss;
-        for (int i=0; i < QUEUE_SIZE; i++) ss << myBuffer[i];
+        for (int i=0; i < BUF_SIZE; i++) ss << myBuffer[i];
         string message = ss.str();
 
-        cout << "(Read func): Message received:" << myBuffer2 << endl;
+        cout << "(Read func): Message received: " << myBuffer2 << endl;
         cout << "(Read func): Message header: " << message << endl;
 
 
@@ -220,7 +220,17 @@ int main(int argc, char *argv[]){
     cout << "(Main func): Waiting for clients to join..." <<endl;
 
     while(1){
-        if (Clients < 5) connect(mySocket);
+        if (Clients < 5)
+            connect(mySocket);
+        else {
+            cout << "(Main func): disconnecting next client";
+            char myBuffer[BUF_SIZE];
+            bzero(myBuffer, BUF_SIZE);
+            int temp = accept(mySocket,NULL, NULL);
+            read(temp, myBuffer, BUF_SIZE);
+            bzero(myBuffer, BUF_SIZE);
+            write(temp, myBuffer, BUF_SIZE);
+        }
     }
 
     return 0;
