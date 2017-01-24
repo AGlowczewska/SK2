@@ -6,10 +6,12 @@ from PyQt5.QtGui import *
 import _thread
 buf_size=1024
 
-def mainData():
-    def __init__(self,users=[],socket=None):
-        self.users=users
-        self.socket=socket
+class mainData(object):
+    _instance = None
+    def __new__(class_, socket=None,users=[]):
+        if not isinstance(class_._instance, class_):
+            class_._instance = object.__new__(class_, socket=None,users=[])
+        return class_._instance
     def setSocket(self,sock):
         self.socket=sock
     def setUsers(self,users):
@@ -22,6 +24,7 @@ def mainData():
     def getUsers(self):
         return self.users
 
+
 data = mainData()
 
 
@@ -30,6 +33,8 @@ class WindowWithKeys(QWidget):
     keyPressed = pyqtSignal(int)
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
+            data = mainData()
+            sock = data.getSocket()
             if sock != None:
                 sock.close()
             print("Escape key pressed. Goodbye!")
@@ -43,6 +48,7 @@ def receiveMessage(message):
     print(m_id[0])
     if m_id[0] == "1":
         nUsers=int(m_id[1])
+        data = mainData()
         print(nUsers)
         #arange list of users+ids
         users = list(zip(*[iter(temp_message[1:])]*2))
@@ -108,7 +114,7 @@ loginButton.move(helloWin.width()/2-loginButton.width()/2,login.height())
 
 server_address = ("localhost", 2057)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+data.setSocket(sock)
 
 def sendMsg():
     sock = data.getSocket()
@@ -175,5 +181,5 @@ msgButton.clicked.connect(sendMsg)
 loginButton.show()
 helloWin.show()
 
-sock.close()
+data.getSocket.close()
 sys.exit(app.exec_())
