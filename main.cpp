@@ -12,7 +12,7 @@
 #include <vector>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2059
+#define SERVER_PORT 2061
 #define QUEUE_SIZE 5
 
 using namespace std;
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]){
     cout << "(Main func): Waiting for clients to join..." <<endl;
 
     while(1){
-        if (Clients < 1)
+        if (Clients < 5)
             connect(mySocket);
         else {
             char myBuffer[BUF_SIZE];

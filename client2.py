@@ -6,9 +6,10 @@ from PyQt5.QtGui import *
 import argparse as prsr
 import _thread
 buf_size=1024
-port=2059
+port=2061
 server='localhost'
 import time
+import os
 
 class mainData(object):
     _instance = None
@@ -53,7 +54,8 @@ def receiveMessage(message):
     if message == '':
         print('no connection this time')
         data.getSocket().close()
-        sys.exit(app.exec_())
+        os._exit(0)
+        _thread.exit()
     temp_message = message.split(' ')
     m_id = temp_message[0]
     print(m_id[0])
@@ -136,9 +138,9 @@ def sendMsg():
     for x in uss:
         mg += x + " "
     mg += str(sys.getsizeof(message.encode()))+" "
-	print(mg)
-	sock.sendall(mg.encode())
-	try:
+    #print(mg)
+    sock.sendall(mg.encode())
+    try:
         sock.sendall(message.encode())
     finally:
         print("msg sent")
@@ -151,7 +153,8 @@ def checkConnection(sock):
         if temp == '':
             print("Disconnected from server")
             d.getSocket().close()
-            sys.exit(app.exec_())
+            os._exit(0)
+            _thread.exit()
 
 
 def closeWarn():
@@ -186,7 +189,7 @@ def logIn(): #function for connection
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
-    _thread.start_new_thread(checkConnection, (sock,))
+    threadid = _thread.start_new_thread(checkConnection, (sock,))
     print("Connection established")
 
     mainWin.show()
