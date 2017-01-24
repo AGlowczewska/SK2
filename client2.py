@@ -129,12 +129,22 @@ def sendMsg():
     mg = msg_type + str(n) + " "
     for x in uss:
         mg += x + " "
-    mg += str(sys.gesizeof(message.encode()))
-    sock.sendall(mg.encode())
-    try:
+    mg += str(sys.getsizeof(message.encode()))+" "
+	print(mg)
+	sock.sendall(mg.encode())
+	try:
         sock.sendall(message.encode())
     finally:
         print("msg sent")
+
+def checkConnection():
+    d=mainData()
+    sock=d.getSocket()
+    while 1:
+        if sock.sendall(b'\x00') == 0:
+            print("Disconnected from server")
+            d.getSocket().close()
+            sys.exit(app.exec_())
 
 
 def closeWarn():
@@ -169,8 +179,8 @@ def logIn(): #function for connection
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
-
-    print("Connection established"),
+    _thread.start_new_thread(checkConnection)
+    print("Connection established")
 
     mainWin.show()
     helloWin.hide()
