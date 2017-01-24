@@ -8,6 +8,7 @@ import _thread
 buf_size=1024
 port=2059
 server='localhost'
+import time
 
 class mainData(object):
     _instance = None
@@ -48,12 +49,17 @@ class WindowWithKeys(QWidget):
 
 
 def receiveMessage(message):
+    data = mainData()
+    if message == '':
+        print('no connection this time')
+        data.getSocket().close()
+        sys.exit(app.exec_())
     temp_message = message.split(' ')
     m_id = temp_message[0]
     print(m_id[0])
     if m_id[0] == "1":
         nUsers=int(m_id[1])
-        data = mainData()
+
         print(nUsers)
         users = list(zip(*[iter(temp_message[1:])]*2))
         uss = []
@@ -141,7 +147,7 @@ def checkConnection(sock):
     d=mainData()
     sock=d.getSocket()
     while 1:
-        if sock.sendall(b'\x00') == 0:
+        if sys.getsizeof(sock.recv(10)) < 4:
             print("Disconnected from server")
             d.getSocket().close()
             sys.exit(app.exec_())
