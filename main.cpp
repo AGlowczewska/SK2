@@ -12,7 +12,7 @@
 #include <vector>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2057
+#define SERVER_PORT 2058
 #define QUEUE_SIZE 5
 
 using namespace std;
@@ -92,21 +92,21 @@ void *reading(void *client){
         //split( message, v, ' ');
         //show( v );
 
-        int lodbiorcow = 0;
-        for (int i =1; i < BUF_SIZE; i++){
-            lodbiorcow = lodbiorcow*10 + (int)myBuffer[i];
-            if (myBuffer[i] == ' ') break;
-        }
-        int temp = 0; int len = 0;
-        for (int i =1; i < BUF_SIZE; i++){
-            if (temp == (lodbiorcow+1)) {
-                len = len*10 + (int)myBuffer[i];
-                if (myBuffer[i] == ' ') break;
+        int lodbiorcow = message.find(' ') - 1;
+        int temp = message.find(' ', lodbiorcow + 2);
+        cout << "MY TEMP IS " << temp << endl;
+
+        ss.str(string());
+        for(int i = 0; i < BUF_SIZE; i++){
+            ss << myBuffer[i];
+            if (myBuffer[i] == ' '){
+                cout << ss.str() << endl;
+                ss.str(string());
             }
-            if (myBuffer == " ") temp++;
         }
-        cout << "(Read func): Received message from: " << myNumber <<" and will be sent to " << lodbiorcow <<" clients" << endl;
-        cout << "(Read func): Message length is: " << len << endl;
+
+        cout << "(Read func): Received message from: " << myNumber << " and will be sent to " << lodbiorcow <<" clients" << endl;
+        //cout << "(Read func): Message length is: " << len << endl;
         if (myBuffer[0] == '1'){
             //tekst
         } else if (myBuffer[0] == '2'){
