@@ -170,15 +170,7 @@ class WindowWithKeys(QWidget):
 
 
 
-def connectionThread(socket):
-    print("new thread")
-    while True:
-        msg_received = socket.recv(buf_size)
-        msg_received=msg_received[:msg_received.find(b'\x00')].decode()
-        mainData().setMsg(msg_received)
-        x=msgDisplayer()
-        x.letsdothis()
-    print("OLA")
+
 
 
 
@@ -294,16 +286,20 @@ def logIn(): #function for connection
             continue
     print("Connected")
     buf = "1 " + login.text()
-    _thread.start_new_thread(connectionThread, (sock,))
     try:
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
+
     _thread.start_new_thread(checkConnection, (sock,))
     print("Connection established")
-
     mainWin.show()
-    helloWin.hide()
+    while True:
+        msg_received = sock.recv(buf_size)
+        msg_received=msg_received[:msg_received.find(b'\x00')].decode()
+        mainData().setMsg(msg_received)
+        x=msgDisplayer()
+        x.letsdothis()
 
 
 #main part
