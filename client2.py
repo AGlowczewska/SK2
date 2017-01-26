@@ -114,9 +114,16 @@ def receiveMessage(message):
         usersList.clear()
         for (desc,username) in users:
             print("ID: {} Username: {}".format(desc,username))
-            usersList.addItem(username)
             uss.append(desc)
             uss_n.append(username)
+
+        model = QStandardItemModel()
+        for name in uss_n:
+            item = QStandardItem(i)
+            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
+            model.appendRow(item)
+        usersList.setModel(model)
 
         data.setUsers(uss)
         data.setUNames(uss_n)
