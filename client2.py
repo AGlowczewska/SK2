@@ -117,8 +117,8 @@ def receiveMessage(message):
             if username == data.getName():
                 data.setID(desc)
             else:
-                usersList.addItem(username)
                 uss.append(desc)
+            usersList.addItem(username)
             print("ID: {} Username: {}".format(desc,username))
 
         data.setUsers(uss)
