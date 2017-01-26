@@ -13,12 +13,12 @@
 #include <math.h>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2063
+#define SERVER_PORT 2057
 #define QUEUE_SIZE 5
 
 using namespace std;
 pthread_mutex_t myMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mySendReadMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mySendMutex = PTHREAD_MUTEX_INITIALIZER;
 int Clients = 0; // number of connected clients
 
  struct Thread{
@@ -40,7 +40,7 @@ void update(){
     }
     string message = ss.str();
     cout << "(Update func): Updating to all:" << message << endl;
-    for (int i=0; i< message.size(); i++) myBuffer[i] = message[i];
+    for (int i=0; (unsigned)i< message.size(); i++) myBuffer[i] = message[i];
     for (int i=0; i < QUEUE_SIZE; i++)
         if (THREADS[i].Id != 0)
             write(THREADS[i].Id, myBuffer, BUF_SIZE);
@@ -85,6 +85,7 @@ void *reading(void *client){
         bzero(myBuffer, BUF_SIZE);
         nBytes = read(THREADS[myNumber].Id, myBuffer, BUF_SIZE);
         if (nBytes == 0) {
+            cerr << "(Read func): Receiving header error" << endl;
             killclient(myNumber);
             pthread_exit(NULL);
         }
@@ -109,10 +110,16 @@ void *reading(void *client){
         cout << "(Read func): Message header: " << myBuffer << endl;
         cout << "(Read func): Received message from: " << myNumber << " and will be sent to " << lodbiorcow <<" clients" << endl;
         cout << "(Read func): The length of message is:" << sendto[lodbiorcow] << endl;
-        cout << "(Read func): The message is splitted in " << ceil(sendto[lodbiorcow]/BUF_SIZE) + 1 << " parts." << endl;
+        int parts = ceil(sendto[lodbiorcow]/BUF_SIZE) + 1;
+        cout << "(Read func): The message is splitted in " << parts << " parts." << endl;
         for(int i=0; i < (ceil(sendto[lodbiorcow]/BUF_SIZE))+1; i++) {
             bzero(myBuffer2, BUF_SIZE);
             nBytes2 = read(THREADS[myNumber].Id, myBuffer2, BUF_SIZE);
+            if (nBytes2 == 0) {
+                cerr << "(Read func): Reading error" << endl;
+                killclient(myNumber);
+                pthread_exit(NULL);
+            }
             for (int j=0; j < BUF_SIZE; j++) ss << myBuffer2[j];
         }
 
@@ -120,33 +127,30 @@ void *reading(void *client){
         cout << "(Read func): Message received: " << message << endl;
         ss.str(string());
         ss << '2' << myBuffer[0] << ' ' << THREADS[myNumber].Id ;
-        //cout << ss.str();
+
         for( int j =0; j < lodbiorcow; j++) ss << ' ' << sendto[j];
         string header = ss.str();
         bzero(myBuffer2, BUF_SIZE);
-        for (int i=0; i< header.size(); i++) myBuffer2[i] = header[i];
+        for (int i=0; (unsigned)i< header.size(); i++) myBuffer2[i] = header[i];
         cout << "(Read func): Sending header: " << myBuffer2 << endl;
-        pthread_mutex_lock(&mySendReadMutex);
+
+        pthread_mutex_lock(&mySendMutex);
         for( int j =0; j < lodbiorcow; j++)
             write(sendto[j], myBuffer2, BUF_SIZE);
         ss.str(string());
 
-        pthread_mutex_unlock(&mySendReadMutex);
-            //cout << "(Read func): Sending message: " << myBuffer2 << endl;
-            //for( int j =0; j < lodbiorcow; j++)
-            //    write(sendto[j], myBuffer2, BUF_SIZE);
 
-        // do update 11 4324 ola 12342 Piotr
-        // do wysylania tekstu 1[lodbiorcow] id1 [...] idn [dlwbajtachwiadomosci]
-        // [wiadomosc]
-        // do wyslania obrazu 2[lodbiorcow] id1 [...] idn [lwbajtachwiadomosci]
-        // [wiadomosc]    -> to wysyla klient a odbiera serwer
-        // serwer rozczytuje userow
-        // serwer wysyla
-        //pthread_mutex_lock(&myMutex2);
-        // wysylam wiad1
-        // wysylam wiad2
-        // unlock
+        for (int i =0; i < parts; i ++) {
+            bzero(myBuffer, BUF_SIZE);
+            for(int j = 0; j < BUF_SIZE; j++)
+                if (message.length() < (unsigned)(j+(i*1024)))
+                    myBuffer[j] = message[j+(i*1024)];
+                else break;
+            for( int j =0; j < lodbiorcow; j++)
+                write(sendto[j], myBuffer, BUF_SIZE);
+        }
+        pthread_mutex_unlock(&mySendMutex);
+        cout << "(Read func): Message sent to clients" << endl;
     }
 
 }
