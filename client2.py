@@ -107,7 +107,6 @@ def receiveMessage(message):
         data.getSocket().close()
     temp_message = message.split(' ')
     m_id = temp_message[0]
-    print(m_id[0])
     if m_id[0] == "1":
         nUsers=int(m_id[1])
         users = list(zip(*[iter(temp_message[1:])]*2))
@@ -118,7 +117,7 @@ def receiveMessage(message):
                 data.setID(desc)
             else:
                 uss.append(desc)
-            usersList.addItem(username)
+                usersList.addItem(username)
             print("ID: {} Username: {}".format(desc,username))
 
         data.setUsers(uss)
@@ -217,7 +216,7 @@ def checkConnection(sock):
     sock=d.getSocket()
     while 1:
         time.sleep(5)
-        temp = sock.recv(0).decode()
+        temp = sock.recv(1).decode()
         if temp == None:
             print("Disconnected from server")
             d.getSocket().close()
