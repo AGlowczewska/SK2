@@ -128,8 +128,10 @@ class msgSender(QWidget):
         self.text.show()
         self.button.show()
         self.text.show()
+        data.addtocollection(self)
         self.button.clicked.connect(self.sendmessage)
-
+        self.show()
+        
     def sendmessage(self):
         print("Przycisk kliknięty :C :<")
         self.rcvs = []
@@ -149,7 +151,6 @@ class msgSender(QWidget):
         for id in self.rcvs:
             self.message2send += id + " "
         sock = data.getSocket()
-        data.addtocollection(self)
         sock.sendall(self.message2send.encode())
         try:
             sock.sendall(message.encode())
@@ -259,9 +260,6 @@ data.setSocket(sock)
 def sendMsg():
     print("KLIX1")
     sender = msgSender()
-    sender.show()
-    x= QWidget()
-    x.show()
     print("KLIX2")
 
 
