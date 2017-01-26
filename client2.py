@@ -16,11 +16,13 @@ app = QApplication(sys.argv)
 
 class mainData(object):
     _instance = None
+
     def __new__(class_):
         if not isinstance(class_._instance, class_):
             class_._instance = object.__new__(class_)
         return class_._instance
     def setSocket(self,sock):
+        self.a=[]
         self.socket=sock
     def setUsers(self,users):
         self.users=users
@@ -71,6 +73,7 @@ class textMsg(QWidget):
         self.aut.setReadOnly(True)
         self.rec.setReadOnly(True)
         self.msg.setReadOnly(True)
+        mainData().addtocollection(self)
         self.aut.show()
         self.rec.show()
         self.msg.show()
@@ -131,9 +134,7 @@ def receiveMessage(message):
             tmp_m+=m+" "
         #show message
         msg = textMsg(sender,temp,tmp_m)
-        x = mainData()
         msg.show()
-        x.addtocollection(msg)
 
 
 
