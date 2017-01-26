@@ -107,13 +107,12 @@ class msgSender(QWidget):
         super(msgSender, self).__init__()
         data = mainData()
         self.users=[[],[]]
-        self.win = QWidget()
-        self.win.resize(300, 500)
+        self.resize(300, 500)
         self.users[0] = data.getUsers()
         self.users[1] = data.getUNames()
-        self.list = QListView(self.win)
-        self.text = QTextEdit(self.win)
-        self.button = QPushButton(self.win)
+        self.list = QListView(self)
+        self.text = QTextEdit(self)
+        self.button = QPushButton(self\)
         self.button.setText("Send Message!")
         self.model = QStandardItemModel()
         for i in range(len(self.users[0])):
@@ -257,7 +256,6 @@ data.setSocket(sock)
 def sendMsg():
     sender = msgSender()
     sender.show()
-    return
 
 
 def checkConnection(sock):
