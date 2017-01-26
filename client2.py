@@ -83,6 +83,56 @@ class textMsg(QWidget):
         self.msg.show()
 
 
+class msgSender(QWidget):
+    def __init__(self):
+        super(textMsg, self).__init__()
+        data=mainData()
+        self.win=QWidget()
+        self.win.resize(300,500)
+        self.users[0]=data.getUsers()
+        self.users[1]=data.getUNames()
+        self.list=QListView(self.win)
+        self.text=QTextEdit(self.win)
+        self.button=QPushButton(self.win)
+        self.button.setText("Send Message!")
+        self.model = QStandardItemModel()
+        for i in range(len(self.users[0])):
+            item = QStandardItem(self.users[1][i])
+            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
+            self.model.appendRow(item)
+        self.text.resize(self.list.width(),100)
+        self.text.move(0,400-self.button.height())
+        self.button.move(0,500-self.button.height())
+        self.text.show()
+        self.button.show()
+        self.text.show()
+        self.button.clicked.connect(self.sendmessage)
+
+    def sendmessage(self):
+        self.rcvs=[]
+        for i in range(self.model.rowCount()):
+            temp = self.model.item(i).checkState()
+            if temp > 0:
+                for j in range(len(self.users[1])):
+                    if self.model.data(self.model.index(i,0)) == self.users[1][j]:
+                        self.rcvs.append(self.users[0][j])
+
+        data=mainData()
+        id=data.getID()
+        msg_type="1"
+        message = self.text.toPlainText()
+        self.message2send=msg_type+id+" "
+        for id in self.rcvs:
+            self.message2send+=id+" "
+        sock=data.getSocket()
+        data.addtocollection(self)
+        sock.sendall(self.message2send.encode())
+        try:
+            sock.sendall(message.encode())
+        finally:
+            print("Message sent successfully!!!")
+
 
 
 class WindowWithKeys(QWidget):
@@ -111,15 +161,17 @@ def receiveMessage(message):
         nUsers=int(m_id[1])
         users = list(zip(*[iter(temp_message[1:])]*2))
         uss = []
+        uss_n = []
         usersList.clear()
         for (desc,username) in users:
             if username == data.getName():
                 data.setID(desc)
             else:
                 uss.append(desc)
+                uss_n.append(username)
                 usersList.addItem(username)
             print("ID: {} Username: {}".format(desc,username))
-
+        data.setUNames(uss_n)
         data.setUsers(uss)
         usersList.show()
     if m_id[0] == "2":
@@ -172,13 +224,9 @@ exitWarn.move(0,warn.height())
 exitWarn.setText('Go back!')
 usersList = QListWidget(mainWin)
 usersList.resize(usersList.width(),100)
-msg = QTextEdit(mainWin)
 msgButton = QPushButton(mainWin)
-msg.move(0,usersList.width())
-msg.resize(200,100)
-msgButton.move(0,200)
+msgButton.move(0,150)
 msgButton.setText('Messages creator')
-msg.show()
 msgButton.show()
 
 login=QLineEdit(helloWin) #line edit for user's nickname
@@ -193,22 +241,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 data.setSocket(sock)
 
 def sendMsg():
-    sock = data.getSocket()
-    uss = data.getUsers()
-    message = msg.toPlainText()
-    n = len(uss)
-    msg_type = "1"
-    mg = msg_type + str(n) + " "
-    mg+=data.getID()+" "
-    for x in uss:
-        mg+=x+" "
-    mg += str(sys.getsizeof(message.encode()))+" "
-    print(mg)
-    sock.sendall(mg.encode())
-    try:
-        sock.sendall(message.encode())
-    finally:
-        print("msg sent")
+    sender=msgSender()
+    sender.show()
+    return
 
 
 def checkConnection(sock):
