@@ -10,7 +10,7 @@ buf_size=1024
 port=2061
 server='localhost'
 import time
-
+app = QApplication(sys.argv)
 
 
 
@@ -150,7 +150,7 @@ def connectionThread(socket):
 
 
 #init everyting
-app = QApplication(sys.argv)
+
 helloWin = WindowWithKeys() #login window
 helloWin.setWindowTitle('First window')
 helloWin.resize(300,100)
