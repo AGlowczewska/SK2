@@ -13,7 +13,7 @@
 #include <math.h>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2057
+#define SERVER_PORT 2058
 #define QUEUE_SIZE 5
 
 using namespace std;
