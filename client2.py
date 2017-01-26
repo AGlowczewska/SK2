@@ -47,6 +47,10 @@ class mainData(object):
         return self.userNames
     def addtocollection(self,x):
         self.a.append(x)
+    def setModel(self,model):
+        self.model=model
+    def getModel(self):
+        return self.model
 data = mainData()
 
 class textMsg(QWidget):
@@ -124,7 +128,6 @@ def receiveMessage(message):
             item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
             model.appendRow(item)
         usersList.setModel(model)
-
         data.setUsers(uss)
         data.setUNames(uss_n)
         usersList.show()
@@ -205,8 +208,12 @@ def sendMsg():
     n = len(uss)
     msg_type = "1"
     mg = msg_type + str(n) + " "
-    for x in uss:
-        mg += x + " "
+    mg+=data.getID+" "
+    model = data.getModel()
+    for i in range(model.rowCount()):
+        z=model.item(i).checkState()
+        if z > 0:
+            mg+=model.data(model.index(i,0))+" "
     mg += str(sys.getsizeof(message.encode()))+" "
     print(mg)
     sock.sendall(mg.encode())
