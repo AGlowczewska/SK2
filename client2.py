@@ -43,7 +43,8 @@ class mainData(object):
         self.userNames=unames
     def getUNames(self):
         return self.userNames
-
+    def addtocollection(self,x):
+        self.a.append(x)
 data = mainData()
 
 class textMsg(QWidget):
@@ -130,7 +131,9 @@ def receiveMessage(message):
             tmp_m+=m+" "
         #show message
         msg = textMsg(sender,temp,tmp_m)
+        x = mainData()
         msg.show()
+        x.addtocollection(msg)
 
 
 
