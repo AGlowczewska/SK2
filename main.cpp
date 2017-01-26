@@ -13,7 +13,7 @@
 #include <math.h>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2069
+#define SERVER_PORT 2063
 #define QUEUE_SIZE 5
 
 using namespace std;
@@ -81,7 +81,7 @@ void *reading(void *client){
     cout << "(Read func): New thread for the client nr: " << myNumber << ", Name: " << THREADS[myNumber].Name << endl;
 
     while(1) {
-        pthread_mutex_lock(&mySendReadMutex);
+
         bzero(myBuffer, BUF_SIZE);
         nBytes = read(THREADS[myNumber].Id, myBuffer, BUF_SIZE);
         if (nBytes == 0) {
@@ -100,13 +100,12 @@ void *reading(void *client){
         int i = 3;
         for( int j =0; j < lodbiorcow+1; j++){
             while (myBuffer[i] != ' '){
-                //cout << "MYBUFFER[i]:" << myBuffer[i] << endl;
                 sendto[j] = (sendto[j]*10) + (int)(myBuffer[i]) - 48;
                 i++;
             }
             i++;
-            //cout << "J:" << j << " , sendto: " << sendto[j] << endl;
         }
+
         cout << "(Read func): Message header: " << myBuffer << endl;
         cout << "(Read func): Received message from: " << myNumber << " and will be sent to " << lodbiorcow <<" clients" << endl;
         cout << "(Read func): The length of message is:" << sendto[lodbiorcow] << endl;
@@ -116,32 +115,27 @@ void *reading(void *client){
             nBytes2 = read(THREADS[myNumber].Id, myBuffer2, BUF_SIZE);
             for (int j=0; j < BUF_SIZE; j++) ss << myBuffer2[j];
         }
-        pthread_mutex_unlock(&mySendReadMutex);
 
-        string message = ss.str();
+        message = ss.str();
         cout << "(Read func): Message received: " << message << endl;
         ss.str(string());
-        if (myBuffer[0] == '1'){
-            //tekst
-            ss << 2 << 1 << ' ' << THREADS[myNumber] ;
-            for( int j =0; j < lodbiorcow; j++) ss << ' ' << sendto[j];
-            string header = ss.str();
-            bzero(myBuffer2, BUF_SIZE);
-            for (int i=0; i< header.size(); i++) myBuffer2[i] = header[i];
-            cout << "(Read func): Sending header: " << myBuffer2 << endl;
-            pthread_mutex_lock(&mySendReadMutex);
-            for( int j =0; j < lodbiorcow; j++)
-                write(sendto[j], myBuffer2, BUF_SIZE);
-            ss.str(string());
+        ss << '2' << myBuffer[0] << ' ' << THREADS[myNumber].Id ;
+        //cout << ss.str();
+        for( int j =0; j < lodbiorcow; j++) ss << ' ' << sendto[j];
+        string header = ss.str();
+        bzero(myBuffer2, BUF_SIZE);
+        for (int i=0; i< header.size(); i++) myBuffer2[i] = header[i];
+        cout << "(Read func): Sending header: " << myBuffer2 << endl;
+        pthread_mutex_lock(&mySendReadMutex);
+        for( int j =0; j < lodbiorcow; j++)
+            write(sendto[j], myBuffer2, BUF_SIZE);
+        ss.str(string());
 
-            pthread_mutex_unlock(&mySendReadMutex);
+        pthread_mutex_unlock(&mySendReadMutex);
             //cout << "(Read func): Sending message: " << myBuffer2 << endl;
             //for( int j =0; j < lodbiorcow; j++)
             //    write(sendto[j], myBuffer2, BUF_SIZE);
 
-        } else if (myBuffer[0] == '2'){
-            //zdjecie
-        }
         // do update 11 4324 ola 12342 Piotr
         // do wysylania tekstu 1[lodbiorcow] id1 [...] idn [dlwbajtachwiadomosci]
         // [wiadomosc]
