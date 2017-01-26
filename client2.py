@@ -97,8 +97,6 @@ def receiveMessage(message):
     if message == '':
         print('no connection this time')
         data.getSocket().close()
-        os._exit(0)
-        _thread.exit()
     temp_message = message.split(' ')
     m_id = temp_message[0]
     print(m_id[0])
@@ -211,6 +209,7 @@ def checkConnection(sock):
     d=mainData()
     sock=d.getSocket()
     while 1:
+        time.sleep(5)
         temp = sock.recv(1).decode()
         if temp == '':
             print("Disconnected from server")
