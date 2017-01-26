@@ -5,11 +5,14 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import argparse as prsr
 import _thread
+import os
 buf_size=1024
 port=2061
 server='localhost'
 import time
-import os
+
+
+
 
 class mainData(object):
     _instance = None
@@ -28,9 +31,49 @@ class mainData(object):
         return self.socket
     def getUsers(self):
         return self.users
-
+    def setName(self,name):
+        self.name=name
+    def setID(self,id):
+        self.id=id
+    def getName(self):
+        return self.name
+    def getID(self):
+        return self.id
+    def setUNames(self,unames):
+        self.userNames=unames
+    def getUNames(self):
+        return self.userNames
 
 data = mainData()
+
+class textMsg(QWidget):
+    def __init__(self,author,receivers,message):
+        super(textMsg, self).__init__()
+        self.author=author
+        self.receivers=receivers
+        self.message=message
+        self.start()
+    def start(self):
+        self.aut = QLineEdit(self)
+        self.rec = QLineEdit(self)
+        self.msg = QTextEdit(self)
+        self.resize(300,400)
+        self.aut.move(0,0)
+        self.aut.resize(300,self.aut.height())
+        self.rec.move(0,self.aut.height())
+        self.rec.resize(300,self.rec.height())
+        self.msg.resize(300,400 - self.rec.height() * 2)
+        self.msg.move(0,self.rec.height()*2)
+        self.aut.setText("Sender: "+self.author)
+        self.rec.setText("Receivers: "+self.receivers)
+        self.msg.setText(self.message)
+        self.aut.setReadOnly(True)
+        self.rec.setReadOnly(True)
+        self.msg.setReadOnly(True)
+        self.aut.show()
+        self.rec.show()
+        self.msg.show()
+
 
 
 
@@ -65,14 +108,33 @@ def receiveMessage(message):
         print(nUsers)
         users = list(zip(*[iter(temp_message[1:])]*2))
         uss = []
+        uss_n = []
         usersList.clear()
         for (desc,username) in users:
             print("ID: {} Username: {}".format(desc,username))
             usersList.addItem(username)
             uss.append(desc)
+            uss_n.append(username)
 
         data.setUsers(uss)
+        data.setUNames(uss_n)
         usersList.show()
+    if m_id[0] == "2":
+        nUsers=int(m_id[1])
+        sender = temp_message[1]
+        recvrs = temp_message[2:2+nUsers]
+        temp = ""
+        for usr in recvrs:
+            temp+=usr+" "
+        msg = temp_message[2+nUsers:]
+        tmp_m = ""
+        for m in msg:
+            tmp_m+=m+" "
+        #show message
+        msg = textMsg(sender,temp,tmp_m)
+        msg.show()
+
+
 
 
 
@@ -127,7 +189,6 @@ server_address = (server,port)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 data.setSocket(sock)
 
-
 def sendMsg():
     sock = data.getSocket()
     uss = data.getUsers()
@@ -138,18 +199,19 @@ def sendMsg():
     for x in uss:
         mg += x + " "
     mg += str(sys.getsizeof(message.encode()))+" "
-    #print(mg)
+    print(mg)
     sock.sendall(mg.encode())
     try:
         sock.sendall(message.encode())
     finally:
         print("msg sent")
 
+
 def checkConnection(sock):
     d=mainData()
     sock=d.getSocket()
     while 1:
-        temp = sock.recv(10).decode()
+        temp = sock.recv(1).decode()
         if temp == '':
             print("Disconnected from server")
             d.getSocket().close()
@@ -189,7 +251,7 @@ def logIn(): #function for connection
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
-    threadid = _thread.start_new_thread(checkConnection, (sock,))
+    _thread.start_new_thread(checkConnection, (sock,))
     print("Connection established")
 
     mainWin.show()
