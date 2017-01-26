@@ -51,6 +51,11 @@ class mainData(object):
         self.model=model
     def getModel(self):
         return self.model
+    def setMsg(self,msg):
+        self.msg=msg
+    def getMsg(self):
+        return self.msg
+
 data = mainData()
 
 class textMsg(QWidget):
@@ -82,6 +87,67 @@ class textMsg(QWidget):
         self.rec.show()
         self.msg.show()
 
+class Emitter(QObject):
+    emitting = pyqtSignal()
+
+class msgDisplayer(QObject):
+    def __init__(self):
+        self.sig=Emitter()
+        QObject.__init__(self)
+        self.sig.emitting.connect(self.recieveMessage)
+        print('succeded')
+    def letsdothis(self):
+        print('letsdothis')
+        self.sig.emitting.emit()
+    @pyqtSlot()
+    def receiveMessage(self):
+        data = mainData()
+        message=data.getMsg()
+        if message == '':
+            print('no connection this time')
+            data.getSocket().close()
+        temp_message = message.split(' ')
+        m_id = temp_message[0]
+        print(m_id[0])
+        if m_id[0] == "1":
+            nUsers = int(m_id[1])
+
+            print(nUsers)
+            users = list(zip(*[iter(temp_message[1:])] * 2))
+            uss = []
+            uss_n = []
+
+            for (desc, username) in users:
+                print("ID: {} Username: {}".format(desc, username))
+                uss.append(desc)
+                uss_n.append(username)
+
+            model = QStandardItemModel()
+            for name in uss_n:
+                item = QStandardItem(name)
+                item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+                item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
+                model.appendRow(item)
+            usersList.setModel(model)
+            data.setUsers(uss)
+            data.setUNames(uss_n)
+            usersList.show()
+        if m_id[0] == "2":
+            nUsers = int(m_id[1])
+            sender = temp_message[1]
+            recvrs = temp_message[2:2 + nUsers]
+            temp = ""
+            for usr in recvrs:
+                temp += usr + " "
+            msg = temp_message[2 + nUsers:]
+            tmp_m = ""
+            for m in msg:
+                tmp_m += m + " "
+            # show message
+            msg = textMsg(sender, temp, tmp_m)
+            msg.show()
+
+
 
 
 
@@ -100,53 +166,6 @@ class WindowWithKeys(QWidget):
         self.keyPressed.emit(Qt.Key(event.key()))
 
 
-def receiveMessage(message):
-    data = mainData()
-    if message == '':
-        print('no connection this time')
-        data.getSocket().close()
-    temp_message = message.split(' ')
-    m_id = temp_message[0]
-    print(m_id[0])
-    if m_id[0] == "1":
-        nUsers=int(m_id[1])
-
-        print(nUsers)
-        users = list(zip(*[iter(temp_message[1:])]*2))
-        uss = []
-        uss_n = []
-
-        for (desc,username) in users:
-            print("ID: {} Username: {}".format(desc,username))
-            uss.append(desc)
-            uss_n.append(username)
-
-        model = QStandardItemModel()
-        for name in uss_n:
-            item = QStandardItem(name)
-            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-            item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
-            model.appendRow(item)
-        usersList.setModel(model)
-        data.setUsers(uss)
-        data.setUNames(uss_n)
-        usersList.show()
-    if m_id[0] == "2":
-        nUsers=int(m_id[1])
-        sender = temp_message[1]
-        recvrs = temp_message[2:2+nUsers]
-        temp = ""
-        for usr in recvrs:
-            temp+=usr+" "
-        msg = temp_message[2+nUsers:]
-        tmp_m = ""
-        for m in msg:
-            tmp_m+=m+" "
-        #show message
-        msg = textMsg(sender,temp,tmp_m)
-        msg.show()
-
-
 
 
 
@@ -156,7 +175,9 @@ def connectionThread(socket):
     while True:
         msg_received = socket.recv(buf_size)
         msg_received=msg_received[:msg_received.find(b'\x00')].decode()
-        receiveMessage(msg_received)
+        mainData().setMsg(msg_received)
+        x=msgDisplayer()
+        x.letsdothis()
     print("OLA")
 
 
