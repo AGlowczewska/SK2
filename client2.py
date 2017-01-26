@@ -105,6 +105,8 @@ class textMsg(QWidget):
 class msgSender(QWidget):
     def __init__(self):
         super(msgSender, self).__init__()
+        self.start()
+    def start(self):
         data = mainData()
         self.users=[[],[]]
         self.resize(300, 500)
@@ -258,6 +260,8 @@ def sendMsg():
     print("KLIX1")
     sender = msgSender()
     sender.show()
+    x= QWidget()
+    x.show()
     print("KLIX2")
 
 
