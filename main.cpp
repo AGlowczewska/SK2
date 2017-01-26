@@ -13,7 +13,7 @@
 #include <math.h>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2058
+#define SERVER_PORT 2057
 #define QUEUE_SIZE 5
 
 using namespace std;
@@ -146,8 +146,10 @@ void *reading(void *client){
                 if (message.length() < (unsigned)(j+(i*1024)))
                     myBuffer[j] = message[j+(i*1024)];
                 else break;
-            for( int j =0; j < lodbiorcow; j++)
+            for( int j =0; j < lodbiorcow; j++) {
+                cout << myBuffer << endl;
                 write(sendto[j], myBuffer, BUF_SIZE);
+            }
         }
         pthread_mutex_unlock(&mySendMutex);
         cout << "(Read func): Message sent to clients" << endl;
