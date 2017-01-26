@@ -101,7 +101,6 @@ class textMsg(QWidget):
         self.rec.show()
         self.msg.show()
 
-
 class msgSender(QWidget):
     def __init__(self):
         super(msgSender, self).__init__()
@@ -122,18 +121,18 @@ class msgSender(QWidget):
             item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
             self.model.appendRow(item)
+        self.list.setModel(self.model)
         self.text.resize(self.list.width(), 100)
         self.text.move(0, 400 - self.button.height())
         self.button.move(0, 500 - self.button.height())
         self.text.show()
         self.button.show()
-        self.text.show()
+        self.list.show()
         data.addtocollection(self)
         self.button.clicked.connect(self.sendmessage)
         self.show()
-        
+
     def sendmessage(self):
-        print("Przycisk kliknięty :C :<")
         self.rcvs = []
         for i in range(self.model.rowCount()):
             temp = self.model.item(i).checkState()
