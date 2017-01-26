@@ -141,15 +141,23 @@ class msgSender(QWidget):
                     if self.model.data(self.model.index(i, 0)) == self.users[1][j]:
                         self.rcvs.append(self.users[0][j])
 
+        if self.rcvs == []:
+            print("lista odbiorców pusta")
+            return
         data = mainData()
         id = data.getID()
         self.message2send=""
         msg_type = "1"
+        message = ''
         message = self.text.toPlainText()
+        if message == '':
+            print("pusta wiadomość")
+            return
         self.message2send = msg_type + id + " "
         for id in self.rcvs:
             self.message2send += id + " "
         sock = data.getSocket()
+        self.message2send+=sys.getsizeof(message)
         sock.sendall(self.message2send.encode())
         try:
             sock.sendall(message.encode())
