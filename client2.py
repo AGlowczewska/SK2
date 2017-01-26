@@ -110,26 +110,15 @@ def receiveMessage(message):
     print(m_id[0])
     if m_id[0] == "1":
         nUsers=int(m_id[1])
-
-        print(nUsers)
         users = list(zip(*[iter(temp_message[1:])]*2))
         uss = []
-        uss_n = []
-
+        usersList.clear()
         for (desc,username) in users:
+            usersList.addItem(username)
             print("ID: {} Username: {}".format(desc,username))
             uss.append(desc)
-            uss_n.append(username)
 
-        model = QStandardItemModel()
-        for name in uss_n:
-            item = QStandardItem(name)
-            item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-            item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
-            model.appendRow(item)
-        usersList.setModel(model)
         data.setUsers(uss)
-        data.setUNames(uss_n)
         usersList.show()
     if m_id[0] == "2":
         nUsers=int(m_id[1])
@@ -179,7 +168,7 @@ warn.setText('You need nick name, to login')
 exitWarn = QPushButton(infoWin)
 exitWarn.move(0,warn.height())
 exitWarn.setText('Go back!')
-usersList = QListView(mainWin)
+usersList = QListWidget(mainWin)
 usersList.resize(usersList.width(),100)
 msg = QTextEdit(mainWin)
 msgButton = QPushButton(mainWin)
@@ -212,12 +201,17 @@ def sendMsg():
     mg+=data.getID+" "
     model = data.getModel()
     temp=[]
+    temp2=[]
     for i in range(model.rowCount()):
         z=model.item(i).checkState()
         if z > 0:
             temp.append(model.data(model.index(i,0)))
-    mg+= temp+" "
-
+    for i in range(len(uss)):
+        for x in temp:
+            if uss_n[i] == x:
+                temp2.append(uss[i])
+    for x in temp2:
+        mg+= x+" "
 
     mg += str(sys.getsizeof(message.encode()))+" "
     print(mg)
@@ -233,8 +227,8 @@ def checkConnection(sock):
     sock=d.getSocket()
     while 1:
         time.sleep(5)
-        temp = sock.recv(1).decode()
-        if temp == '':
+        temp = sock.recv(0).decode()
+        if temp == None:
             print("Disconnected from server")
             d.getSocket().close()
             os._exit(0)
