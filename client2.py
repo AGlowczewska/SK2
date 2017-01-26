@@ -1,6 +1,6 @@
 import socket
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QListWidget, QTextEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QListWidget, QTextEdit, QListView
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 import argparse as prsr
@@ -122,8 +122,8 @@ def receiveMessage(message):
             uss_n.append(username)
 
         model = QStandardItemModel()
-        for name in uss_n:
-            item = QStandardItem(i)
+        for (name,id) in zip(uss_n,uss):
+            item = QStandardItem(name,id)
             item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
             model.appendRow(item)
@@ -179,7 +179,7 @@ warn.setText('You need nick name, to login')
 exitWarn = QPushButton(infoWin)
 exitWarn.move(0,warn.height())
 exitWarn.setText('Go back!')
-usersList = QListWidget(mainWin)
+usersList = QListView(mainWin)
 usersList.resize(usersList.width(),100)
 msg = QTextEdit(mainWin)
 msgButton = QPushButton(mainWin)
