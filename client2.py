@@ -115,15 +115,15 @@ def receiveMessage(message):
         users = list(zip(*[iter(temp_message[1:])]*2))
         uss = []
         uss_n = []
-        usersList.clear()
+
         for (desc,username) in users:
             print("ID: {} Username: {}".format(desc,username))
             uss.append(desc)
             uss_n.append(username)
 
         model = QStandardItemModel()
-        for (name,id) in zip(uss_n,uss):
-            item = QStandardItem(name,id)
+        for name in uss_n:
+            item = QStandardItem(name)
             item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
             model.appendRow(item)
@@ -203,17 +203,27 @@ data.setSocket(sock)
 
 def sendMsg():
     sock = data.getSocket()
-    uss = data.getUsers()
+    uss = data.getID()
+    uss_n = data.getName()
     message = msg.toPlainText()
     n = len(uss)
     msg_type = "1"
     mg = msg_type + str(n) + " "
     mg+=data.getID+" "
     model = data.getModel()
+    temp=[]
     for i in range(model.rowCount()):
         z=model.item(i).checkState()
         if z > 0:
-            mg+=model.data(model.index(i,0))+" "
+            temp.append(model.data(model.index(i,0)))
+    temp2=[]
+    for i in range(len(uss)):
+        temp2[i][0]=uss[i]
+        temp2[i][1]=uss_n[i]
+    temp = temp2[temp==temp2[:,1]][0]
+    for x in temp:
+        mg+=x+" "
+
     mg += str(sys.getsizeof(message.encode()))+" "
     print(mg)
     sock.sendall(mg.encode())
