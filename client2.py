@@ -114,9 +114,12 @@ def receiveMessage(message):
         uss = []
         usersList.clear()
         for (desc,username) in users:
-            usersList.addItem(username)
+            if username == data.getName():
+                data.setID(desc)
+            else:
+                usersList.addItem(username)
+                uss.append(desc)
             print("ID: {} Username: {}".format(desc,username))
-            uss.append(desc)
 
         data.setUsers(uss)
         usersList.show()
@@ -192,27 +195,14 @@ data.setSocket(sock)
 
 def sendMsg():
     sock = data.getSocket()
-    uss = data.getID()
-    uss_n = data.getName()
+    uss = data.getUsers()
     message = msg.toPlainText()
     n = len(uss)
     msg_type = "1"
     mg = msg_type + str(n) + " "
-    mg+=data.getID+" "
-    model = data.getModel()
-    temp=[]
-    temp2=[]
-    for i in range(model.rowCount()):
-        z=model.item(i).checkState()
-        if z > 0:
-            temp.append(model.data(model.index(i,0)))
-    for i in range(len(uss)):
-        for x in temp:
-            if uss_n[i] == x:
-                temp2.append(uss[i])
-    for x in temp2:
-        mg+= x+" "
-
+    mg+=data.getID()+" "
+    for x in uss:
+        mg+=x+" "
     mg += str(sys.getsizeof(message.encode()))+" "
     print(mg)
     sock.sendall(mg.encode())
@@ -252,6 +242,7 @@ def logIn(): #function for connection
     server_address = (server,port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data.setSocket(sock)
+    data.setName(login.text())
     print(sock)
     print("Connecting to server...")
     while 1:
