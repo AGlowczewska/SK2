@@ -94,7 +94,7 @@ class msgDisplayer(QObject):
     def __init__(self):
         self.sig=Emitter()
         QObject.__init__(self)
-        self.sig.emitting.connect(self.recieveMessage)
+        self.sig.emitting.connect(self.receiveMessage)
         print('succeded')
     def letsdothis(self):
         print('letsdothis')
