@@ -13,7 +13,7 @@
 #include <math.h>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2065
+#define SERVER_PORT 2069
 #define QUEUE_SIZE 5
 
 using namespace std;
@@ -133,14 +133,18 @@ void *reading(void *client){
         ss.str(string());
         ss << '2' << myBuffer[0] << ' ' << THREADS[myNumber].Id ;
 
-        for( int j =1; j < lodbiorcow + 1; j++) ss << ' ' << sendto[j];
+        for( int j = 0; j < lodbiorcow + 1; j++) ss << ' ' << sendto[j];
         string header = ss.str();
         bzero(myBuffer2, BUF_SIZE);
         for (int i=0; (unsigned)i< header.size(); i++) myBuffer2[i] = header[i];
         cout << "(Read func): Sending header: " << myBuffer2 << endl;
 
         pthread_mutex_lock(&mySendMutex);
-        for( int j =0; j < lodbiorcow; j++)
+        cout << "(Read func): Sending to: ";
+        for (int i=1; i< lodbiorcow +1; i++) cout << sendto[i] << ' ' ;
+        cout << endl;
+
+        for( int j =1; j < lodbiorcow +1; j++)
             write(sendto[j], myBuffer2, BUF_SIZE);
         ss.str(string());
 
@@ -150,7 +154,7 @@ void *reading(void *client){
                 if (message.length() > (unsigned)(j+(i*1024)))
                     myBuffer[j] = message[j+(i*1024)];
                 else break;
-            for( int j =0; j < lodbiorcow; j++) {
+            for( int j =1; j < lodbiorcow + 1; j++) {
                 write(sendto[j], myBuffer, BUF_SIZE);
             }
         }

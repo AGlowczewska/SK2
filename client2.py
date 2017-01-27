@@ -3,13 +3,12 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QLabel, QListWidget, QTextEdit, QListView
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-import argparse as prsr
 import _thread
 import os
 
 buf_size = 1024
-port = 2065
-server = 'localhost'
+# port = 2068
+# server = 'localhost'
 import time
 
 app = QApplication(sys.argv)
@@ -67,6 +66,16 @@ class mainData(object):
     def getModel(self):
         return self.model
 
+    def setPort(self,port):
+        self.port=port
+
+    def getPort(self):
+        return int(self.port.text())
+    def setIP(self,ip):
+        self.ip=ip
+    def getIP(self):
+        return self.ip.text()
+
 
 data = mainData()
 
@@ -77,6 +86,7 @@ class textMsg(QWidget):
         self.author = author
         self.receivers = receivers
         self.message = message
+        print(self.message)
         self.start()
 
     def start(self):
@@ -108,10 +118,11 @@ class msgSender(QWidget):
     def start(self):
         data = mainData()
         self.users=[[],[]]
-        self.resize(300, 500)
+        self.resize(300, 300)
         self.users[0] = data.getUsers()
         self.users[1] = data.getUNames()
         self.list = QListView(self)
+        self.list.resize(300,100)
         self.text = QTextEdit(self)
         self.button = QPushButton(self)
         self.button.setText("Send Message!")
@@ -122,14 +133,15 @@ class msgSender(QWidget):
             item.setData(QVariant(Qt.Unchecked), Qt.CheckStateRole)
             self.model.appendRow(item)
         self.list.setModel(self.model)
-        self.text.resize(self.list.width(), 100)
-        self.text.move(0, 400 - self.button.height())
-        self.button.move(0, 500 - self.button.height())
+        self.text.resize(300, 100)
+        self.text.move(0, 200 - self.button.height())
+        self.button.move(0, 300 - self.button.height())
         self.text.show()
         self.button.show()
         self.list.show()
         data.addtocollection(self)
         self.button.clicked.connect(self.sendmessage)
+        self.setWindowTitle(data.getName()+"received message")
         self.show()
 
     def sendmessage(self):
@@ -182,11 +194,13 @@ class WindowWithKeys(QWidget):
 
 
 def receiveMessage(message):
+    print('recieved: '+message)
     data = mainData()
     if message == '':
         print('no connection this time')
         data.getSocket().close()
     temp_message = message.split(' ')
+    print('msg: ')
     m_id = temp_message[0]
     if m_id[0] == "1":
         nUsers = int(m_id[1])
@@ -208,25 +222,60 @@ def receiveMessage(message):
     if m_id[0] == "2":
         nUsers = int(m_id[1])
         sender = temp_message[1]
-        recvrs = temp_message[2:2 + nUsers]
+        recvrs = temp_message[2:3 + nUsers]
         temp = ""
         for usr in recvrs:
             temp += usr + " "
-        msg = temp_message[2 + nUsers:]
+        msg = temp_message[3 + nUsers:]
         tmp_m = ""
+        mg=decodeusers(temp)
+        if sender == data.getID():
+            return
         for m in msg:
             tmp_m += m + " "
         # show message
-        msg = textMsg(sender, temp, tmp_m)
+        msg = textMsg(sender, mg, tmp_m)
+        print(sender)
+        print(mg)
         msg.show()
 
+def decodeusers(id_string):
+    data=mainData()
+    temp=[[],[]]
+    temp[0]=data.getUsers()
+    temp[1]=data.getUNames()
+    z=id_string.split(' ')
+    lista=[]
+    for i in range(len(temp[1])):
+        for id in z:
+            if id == temp[0][i]:
+                lista.append(temp[1][i])
+    msg=""
+    for name in lista:
+        msg+=name+" "
+    return msg
+
+def decodesender(id):
+    data=mainData()
+    temp=[[],[]]
+    temp[0] = data.getUsers()
+    temp[1] = data.getUNames()
+    for i in range(len(temp[1])):
+        if id == temp[0][i]:
+            print("S: "+temp[1][i])
+            return temp[1][i]
 
 def connectionThread(socket):
     print("new thread")
     while True:
         msg_received = socket.recv(buf_size)
         msg_received = msg_received[:msg_received.find(b'\x00')].decode()
-        receiveMessage(msg_received)
+        if int(msg_received.split(' ')[0][0])>1:
+            msg2 = socket.recv(buf_size)
+            msg2=msg2[:msg2.find(b'\x00')].decode()
+            receiveMessage(msg_received+" "+msg2)
+        else:
+            receiveMessage(msg_received)
     print("OLA")
 
 
@@ -252,14 +301,21 @@ msgButton = QPushButton(mainWin)
 msgButton.move(0, 150)
 msgButton.setText('Messages creator')
 msgButton.show()
-
+serv = QLineEdit(helloWin)
+port2 = QLineEdit(helloWin)
+serv.move(0,0)
+port2.move(helloWin.width()-port2.width(),0)
+serv.show()
+port2.show()
 login = QLineEdit(helloWin)  # line edit for user's nickname
-login.move(helloWin.width() / 2 - login.width() / 2, 0)
+login.move(+helloWin.width() / 2 - login.width() / 2, serv.height())
 loginButton = QPushButton(helloWin)  # after pushing that button, user will connect to server
 loginButton.setText('Login')
-loginButton.move(helloWin.width() / 2 - loginButton.width() / 2, login.height())
+loginButton.move(helloWin.width() / 2 - loginButton.width() / 2, login.height()*2)
 
-server_address = (server, port)
+
+
+server_address = ("",0)
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 data.setSocket(sock)
 
@@ -291,6 +347,12 @@ def closeWarn():
 
 def logIn():  # function for connection
     # check for nickname
+    data.setIP(serv)
+    data.setPort(port2)
+    print(data.getIP())
+    print(data.getPort())
+    server_address = (data.getIP(), data.getPort())
+    print(server_address)
     if login.text() == '':
         infoWin.show()
         warn.show()
@@ -298,10 +360,11 @@ def logIn():  # function for connection
         # show 'u need name'
         return
     # if nickname was entered, establish connection
-    server_address = (server, port)
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     data.setSocket(sock)
     data.setName(login.text())
+    mainWin.setWindowTitle('Main board '+data.getName())
     print(sock)
     print("Connecting to server...")
     while 1:
@@ -317,7 +380,7 @@ def logIn():  # function for connection
         sock.sendall(buf.encode())
     finally:
         print("Nickname sent")
-    _thread.start_new_thread(checkConnection, (sock,))
+    #_thread.start_new_thread(checkConnection, (sock,))
     print("Connection established")
 
     mainWin.show()
