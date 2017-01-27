@@ -138,8 +138,7 @@ void *reading(void *client){
         for( int j =0; j < lodbiorcow; j++)
             write(sendto[j], myBuffer2, BUF_SIZE);
         ss.str(string());
-
-        cout << "Message: " << message << endl;
+        
         for (int i =0; i < parts; i ++) {
             bzero(myBuffer, BUF_SIZE);
             for(int j = 0; j < BUF_SIZE; j++)
@@ -147,7 +146,6 @@ void *reading(void *client){
                     myBuffer[j] = message[j+(i*1024)];
                 else break;
             for( int j =0; j < lodbiorcow; j++) {
-                cout << myBuffer << endl;
                 write(sendto[j], myBuffer, BUF_SIZE);
             }
         }
