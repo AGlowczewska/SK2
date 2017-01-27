@@ -13,7 +13,7 @@
 #include <math.h>
 
 #define BUF_SIZE 1024
-#define SERVER_PORT 2060
+#define SERVER_PORT 2065
 #define QUEUE_SIZE 5
 
 using namespace std;
@@ -84,6 +84,7 @@ void *reading(void *client){
 
         bzero(myBuffer, BUF_SIZE);
         nBytes = read(THREADS[myNumber].Id, myBuffer, BUF_SIZE);
+        cout << "(Read func): Message header: " << myBuffer << endl;
         if (nBytes == 0) {
             cerr << "(Read func): Receiving header error" << endl;
             killclient(myNumber);
@@ -93,22 +94,26 @@ void *reading(void *client){
         stringstream ss;
         for (int i=0; i < BUF_SIZE; i++) ss << myBuffer[i];
         string message = ss.str();
+
         int lodbiorcow = message.find(' ') - 1;
+        lodbiorcow = myBuffer[lodbiorcow] - 48;
+        cout << "(Read func): Received message from: " << myNumber << " and will be sent to " << lodbiorcow <<" clients" << endl;
         ss.str(string());
 
         int sendto[6]; for (int i=0; i<6; i++) sendto[i] = 0; //last position is length of file
 
         int i = 3;
-        for( int j =0; j < lodbiorcow+1; j++){
+        for( int j =0; j < lodbiorcow+2; j++){
             while (myBuffer[i] != ' '){
                 sendto[j] = (sendto[j]*10) + (int)(myBuffer[i]) - 48;
+               // cout << "JJJ:" << j << " " << sendto[j] << endl;
                 i++;
             }
             i++;
         }
 
-        cout << "(Read func): Message header: " << myBuffer << endl;
-        cout << "(Read func): Received message from: " << myNumber << " and will be sent to " << lodbiorcow <<" clients" << endl;
+        //for( int j =0; j < lodbiorcow+2; j++) cout << "J:" << j << " " << sendto[j] << endl;
+
         cout << "(Read func): The length of message is:" << sendto[lodbiorcow] << endl;
         int parts = ceil(sendto[lodbiorcow]/BUF_SIZE) + 1;
         cout << "(Read func): The message is splitted in " << parts << " parts." << endl;
@@ -128,7 +133,7 @@ void *reading(void *client){
         ss.str(string());
         ss << '2' << myBuffer[0] << ' ' << THREADS[myNumber].Id ;
 
-        for( int j =0; j < lodbiorcow; j++) ss << ' ' << sendto[j];
+        for( int j =1; j < lodbiorcow + 1; j++) ss << ' ' << sendto[j];
         string header = ss.str();
         bzero(myBuffer2, BUF_SIZE);
         for (int i=0; (unsigned)i< header.size(); i++) myBuffer2[i] = header[i];
@@ -138,7 +143,7 @@ void *reading(void *client){
         for( int j =0; j < lodbiorcow; j++)
             write(sendto[j], myBuffer2, BUF_SIZE);
         ss.str(string());
-        
+
         for (int i =0; i < parts; i ++) {
             bzero(myBuffer, BUF_SIZE);
             for(int j = 0; j < BUF_SIZE; j++)

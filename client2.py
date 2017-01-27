@@ -8,7 +8,7 @@ import _thread
 import os
 
 buf_size = 1024
-port = 2061
+port = 2065
 server = 'localhost'
 import time
 
@@ -157,7 +157,7 @@ class msgSender(QWidget):
         for ide in self.rcvs:
             self.message2send+=ide + " "
         sock = data.getSocket()
-        self.message2send+=str(sys.getsizeof(message))
+        self.message2send+=str(sys.getsizeof(message))+" "
         sock.sendall(self.message2send.encode())
         try:
             sock.sendall(message.encode())
