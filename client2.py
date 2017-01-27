@@ -153,11 +153,11 @@ class msgSender(QWidget):
         if message == '':
             print("pusta wiadomość")
             return
-        self.message2send = msg_type + id + " "
-        for id in self.rcvs:
-            self.message2send += id + " "
+        self.message2send = msg_type+str(len(self.rcvs)) +" "+ id + " "
+        for ide in self.rcvs:
+            self.message2send+=ide + " "
         sock = data.getSocket()
-        self.message2send+=sys.getsizeof(message)
+        self.message2send+=str(sys.getsizeof(message))
         sock.sendall(self.message2send.encode())
         try:
             sock.sendall(message.encode())
